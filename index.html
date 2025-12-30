@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>「小販牌照」查詢系統</title>
+    <!-- Awesome Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <style>
+        .element-hidden {
+            display: none !important;
+        }
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: #1f2937;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #111827;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 5px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group div {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: #0f766e;
+        }
+
+        .form-control {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+
+        .checkbox-group {
+            display: block !important;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: inline-grid;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+
+        .data-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        /* Data Section Styles */
+        .data-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .data-header h2 {
+            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-header .subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .data-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #14b8a6;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .accordion-container {
+            margin-top: 20px;
+        }
+
+        .dataset-group {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dataset-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dataset-header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dataset-header.active {
+            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+        }
+
+        .dataset-header i {
+            transition: transform 0.3s ease;
+        }
+
+        .dataset-header.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .dataset-content {
+            padding: 5px;
+            background: white;
+        }
+
+        .licence-type-group {
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .licence-type-header {
+            background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .licence-type-content {
+            padding: 5px;
+            background: #f8fafc;
+        }
+
+        .trade-group {
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .trade-header {
+            background: #99f6e4;
+            color: #134e4a;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .trade-content {
+            padding: 5px;
+            background: white;
+        }
+
+        .region-group {
+            margin-bottom: 12px;
+            border: 1px solid #a7f3d0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .region-header {
+            background: #ccfbf1;
+            color: #0f766e;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .region-content {
+            padding: 5px;
+            background: white;
+        }
+
+        .district-group {
+            margin-bottom: 12px;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .district-header {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .street-group {
+            margin-bottom: 12px;
+            border: 1px solid #dcfce7;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .street-header {
+            background: #ecfdf5;
+            color: #047857;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .hawker-list {
+            display: grid;
+            gap: 12px;
+            padding: 5px;
+        }
+
+        .hawker-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .hawker-item:hover {
+            background: #f1f5f9;
+            border-color: #14b8a6;
+        }
+
+        .hawker-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .hawker-row {
+            display: flex;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .hawker-label {
+            font-weight: 600;
+            color: #374151;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        .hawker-value {
+            flex: 1;
+            color: #6b7280;
+            word-break: break-word;
+        }
+
+        .hawker-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .badge-licence {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-location {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-coordinates {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-trade {
+            background: #f3e8ff;
+            color: #5b21b6;
+        }
+
+        .hawker-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .coordinates-section {
+            margin-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+
+        .coordinates-item {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #14b8a6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+            padding: 7px;
+            margin-top: auto;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 3000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .notification.info {
+            background-color: #14b8a6;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                background: #0f766e;
+            }
+
+            .container {
+                gap: 16px;
+            }
+
+            .header {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                margin-bottom: 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .data-section {
+                max-height: 400px;
+                padding: 15px;
+            }
+
+            .data-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .hawker-info {
+                grid-template-columns: 1fr;
+            }
+
+            .hawker-row {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            .hawker-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .dataset-header {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Desktop Enhancements */
+        @media (min-width: 1200px) {
+            .data-section {
+                max-height: 65vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>「小販牌照」查詢系統</h1>
+            <p class="subtitle">食物環境衞生署小販牌照資訊查詢系統</p>
+        </header>
+        <section class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <div>
+                        <i class="fas fa-filter"></i>
+                        顯示選項
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="showEmptyCategories" checked>
+                            <label for="showEmptyCategories">顯示空分類</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="groupByCategory" checked>
+                            <label for="groupByCategory">按分類分組顯示</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div>
+                        <i class="fas fa-search"></i>
+                        搜索篩選
+                    </div>
+                    <input type="text" id="searchInput" class="form-control" placeholder="輸入牌照編號、地址或地點進行搜索...">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="loadHawkerLicenses()">
+                    <i class="fas fa-download"></i>
+                    載入小販牌照資料
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    <i class="fas fa-redo"></i>
+                    重置查詢
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearCache()">
+                    <i class="fas fa-trash-alt"></i>
+                    清除緩存
+                </button>
+            </div>
+        </section>
+        <main class="main-content">
+            <section class="data-section">
+                <div class="data-header">
+                    <h2>小販牌照資訊列表</h2>
+                    <p class="subtitle">點擊分類查看詳細小販牌照資訊</p>
+                </div>
+                <div class="data-stats">
+                    <div class="stat-item">
+                        <span id="total-licenses" class="stat-value">0</span>
+                        <span class="stat-label">牌照總數</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-datasets" class="stat-value">0</span>
+                        <span class="stat-label">資料集數</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-regions" class="stat-value">0</span>
+                        <span class="stat-label">地區總數</span>
+                    </div>
+                    <div class="stat-item" style="display:none;">
+                        <span id="last-update-time" class="stat-value">-</span>
+                        <span class="stat-label">最後更新</span>
+                    </div>
+                </div>
+                <div class="accordion-container" id="accordion-container">
+                    <div class="no-data">
+                        <i class="fas fa-store"></i>
+                        <p>請點擊「載入小販牌照資料」按鈕載入數據</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer class="footer">
+            <p>「小販牌照」查詢系統<br />資料來源: 食物環境衞生署<span id="data-update-time" hidden>-</span></p>
+        </footer>
+    </div>
+    <script>
+        // 全局變量
+        let hawkerData = [];
+        let datasetsSet = new Set();
+        let regionsSet = new Set();
+        let db = null;
+        const DB_NAME = 'FEHD_HAWKER_CACHE';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'hawker_licenses';
+        const DATA_SOURCE_URL = 'https://portal.csdi.gov.hk/server/services/common/fehd_rcd_1629967776542_52851/MapServer/WFSServer?service=wfs&request=GetFeature&typenames=FEHD_HLI&outputFormat=geojson';
+
+        // IndexedDB 初始化
+        async function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve();
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'cacheKey' });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+
+        // 保存數據到 IndexedDB
+        async function saveToCache(data) {
+            if (!db) await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const item = {
+                    cacheKey: 'hawker_licenses_data',
+                    data: data,
+                    timestamp: Date.now()
+                };
+                const request = store.put(item);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve();
+            });
+        }
+
+        // 從 IndexedDB 讀取數據
+        async function getFromCache() {
+            if (!db) await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get('hawker_licenses_data');
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const result = request.result;
+                    // 緩存有效期：24小時
+                    if (result && (Date.now() - result.timestamp < 24 * 60 * 60 * 1000)) {
+                        resolve(result.data);
+                    } else {
+                        resolve(null);
+                    }
+                };
+            });
+        }
+
+        // 清除緩存
+        async function clearCache() {
+            try {
+                const request = indexedDB.deleteDatabase(DB_NAME);
+                request.onerror = () => {
+                    showNotification('清除緩存失敗', 'error');
+                };
+                request.onsuccess = () => {
+                    showNotification('緩存已清除', 'success');
+                    resetForm();
+                    db = null;
+                    initDB();
+                };
+            } catch (error) {
+                console.error('清除緩存時出錯:', error);
+                showNotification('清除緩存時出錯', 'error');
+            }
+        }
+
+        // 初始化應用
+        document.addEventListener('DOMContentLoaded', async function () {
+            // 綁定搜索事件
+            document.getElementById('searchInput').addEventListener('input', filterHawkerData);
+
+            // 初始化 IndexedDB
+            try {
+                await initDB();
+                showNotification('數據庫已初始化', 'info');
+            } catch (error) {
+                console.error('初始化數據庫時出錯:', error);
+            }
+        });
+
+        // 重置表單
+        function resetForm() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('showEmptyCategories').checked = true;
+            document.getElementById('groupByCategory').checked = true;
+            clearHawkerData();
+        }
+
+        // 清除小販資料
+        function clearHawkerData() {
+            hawkerData = [];
+            datasetsSet.clear();
+            regionsSet.clear();
+            updateStatistics();
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = '<div class="no-data"><i class="fas fa-store"></i><p>請點擊「載入小販牌照資料」按鈕載入數據</p></div>';
+        }
+
+        // 載入小販牌照資料
+        async function loadHawkerLicenses() {
+            // 檢查緩存
+            try {
+                const cachedData = await getFromCache();
+                if (cachedData) {
+                    showNotification('從緩存載入數據', 'info');
+                    processHawkerData(cachedData);
+                    updateHawkerList(cachedData);
+                    updateStatistics();
+                    return;
+                }
+            } catch (error) {
+                console.warn('讀取緩存時出錯:', error);
+            }
+
+            // 顯示加載狀態
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在載入小販牌照資料...</p>
+                </div>
+            `;
+
+            try {
+                // 從政府API獲取數據
+                const response = await fetch(DATA_SOURCE_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                // 保存到緩存
+                try {
+                    await saveToCache(data);
+                } catch (error) {
+                    console.warn('保存到緩存時出錯:', error);
+                }
+
+                // 處理數據
+                processHawkerData(data);
+                updateHawkerList(data);
+                updateStatistics();
+
+                showNotification(`成功載入 ${data.features.length} 筆小販牌照資料`, 'success');
+            } catch (error) {
+                console.error('載入小販牌照資料時出錯:', error);
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>載入小販牌照資料時出錯</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
+                showNotification('載入小販牌照資料時出錯，請稍後再試', 'error');
+            }
+        }
+
+        // 處理小販牌照資料
+        function processHawkerData(data) {
+            hawkerData = data.features || [];
+            datasetsSet.clear();
+            regionsSet.clear();
+
+            hawkerData.forEach(hawker => {
+                const properties = hawker.properties || {};
+                datasetsSet.add(properties.DATASET_TC || '未知資料集');
+                regionsSet.add(properties.SEARCH01_TC || '未知地區');
+            });
+        }
+
+        // 更新統計數據
+        function updateStatistics() {
+            document.getElementById('total-licenses').textContent = hawkerData.length;
+            document.getElementById('total-datasets').textContent = datasetsSet.size;
+            document.getElementById('total-regions').textContent = regionsSet.size;
+
+            // 更新最後更新時間
+            if (hawkerData.length > 0) {
+                let latestUpdate = '';
+                hawkerData.forEach(hawker => {
+                    const updateTime = hawker.properties?.LASTUPDATE;
+                    if (updateTime && updateTime > latestUpdate) {
+                        latestUpdate = updateTime;
+                    }
+                });
+                if (latestUpdate) {
+                    const formattedTime = formatDateTime(latestUpdate);
+                    document.getElementById('last-update-time').textContent = formattedTime;
+                    document.getElementById('data-update-time').textContent = formattedTime;
+                }
+            }
+        }
+
+        // 過濾小販數據
+        function filterHawkerData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const showEmptyCategories = document.getElementById('showEmptyCategories').checked;
+            const groupByCategory = document.getElementById('groupByCategory').checked;
+
+            if (!searchTerm) {
+                updateHawkerList({ features: hawkerData });
+                return;
+            }
+
+            const filteredHawkers = hawkerData.filter(hawker => {
+                const props = hawker.properties || {};
+                return (
+                    (props.NAME_TC && props.NAME_TC.toLowerCase().includes(searchTerm)) ||
+                    (props.NAME_EN && props.NAME_EN.toLowerCase().includes(searchTerm)) ||
+                    (props.ADDRESS_TC && props.ADDRESS_TC.toLowerCase().includes(searchTerm)) ||
+                    (props.ADDRESS_EN && props.ADDRESS_EN.toLowerCase().includes(searchTerm)) ||
+                    (props.SEARCH04_TC && props.SEARCH04_TC.toLowerCase().includes(searchTerm)) ||
+                    (props.SEARCH04_EN && props.SEARCH04_EN.toLowerCase().includes(searchTerm))
+                );
+            });
+
+            updateHawkerList({ features: filteredHawkers }, showEmptyCategories, groupByCategory);
+        }
+
+        // 更新小販列表
+        function updateHawkerList(data, showEmptyCategories = true, groupByCategory = true) {
+            const container = document.getElementById('accordion-container');
+            const hawkers = data.features || [];
+
+            if (hawkers.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-search"></i>
+                        <p>找不到符合條件的小販牌照資料</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">請嘗試其他搜尋條件</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!groupByCategory) {
+                // 平鋪顯示所有小販牌照
+                let hawkersHTML = '';
+                hawkers.forEach((hawker, index) => {
+                    hawkersHTML += createHawkerItemHTML(hawker, index, false);
+                });
+                container.innerHTML = `
+                    <div class="hawker-list">
+                        ${hawkersHTML}
+                    </div>
+                `;
+                return;
+            }
+
+            // 按 DATASET_TC -> NSEARCH01_TC -> SEARCH03_TC -> SEARCH01_TC -> SEARCH02_TC -> SEARCH04_TC -> ADDRESS_TC 分組
+            const groupedData = {};
+
+            hawkers.forEach(hawker => {
+                const props = hawker.properties || {};
+                const dataset = props.DATASET_TC || '未知資料集';
+                const licenceType = props.NSEARCH01_TC || '未知牌照類型';
+                const trade = props.SEARCH03_TC || '未知行業';
+                const region = props.SEARCH01_TC || '未知地區';
+                const district = props.SEARCH02_TC || '未知分區';
+                const street = props.SEARCH04_TC || '未知街道';
+                const address = props.ADDRESS_TC || '未知地址';
+
+                // 建立分組結構
+                if (!groupedData[dataset]) {
+                    groupedData[dataset] = {};
+                }
+                if (!groupedData[dataset][licenceType]) {
+                    groupedData[dataset][licenceType] = {};
+                }
+                if (!groupedData[dataset][licenceType][trade]) {
+                    groupedData[dataset][licenceType][trade] = {};
+                }
+                if (!groupedData[dataset][licenceType][trade][region]) {
+                    groupedData[dataset][licenceType][trade][region] = {};
+                }
+                if (!groupedData[dataset][licenceType][trade][region][district]) {
+                    groupedData[dataset][licenceType][trade][region][district] = {};
+                }
+                if (!groupedData[dataset][licenceType][trade][region][district][street]) {
+                    groupedData[dataset][licenceType][trade][region][district][street] = {};
+                }
+                if (!groupedData[dataset][licenceType][trade][region][district][street][address]) {
+                    groupedData[dataset][licenceType][trade][region][district][street][address] = [];
+                }
+                groupedData[dataset][licenceType][trade][region][district][street][address].push(hawker);
+            });
+
+            let accordionHTML = '';
+            let datasetIndex = 0;
+
+            Object.keys(groupedData).forEach(dataset => {
+                const licenceTypes = groupedData[dataset];
+                const licenceTypeKeys = Object.keys(licenceTypes);
+
+                if (!showEmptyCategories && licenceTypeKeys.length === 0) return;
+
+                accordionHTML += `
+                    <div class="dataset-group" data-dataset="${dataset}">
+                        <div class="dataset-header" onclick="toggleAccordion(this)">
+                            <div>
+                                <i class="fas fa-database" style="margin-right: 8px;"></i>
+                                <span>${dataset} (${licenceTypeKeys.length} 種牌照類型)</span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dataset-content" style="display: none;">
+                `;
+
+                let licenceTypeIndex = 0;
+                licenceTypeKeys.forEach(licenceType => {
+                    const trades = licenceTypes[licenceType];
+                    const tradeKeys = Object.keys(trades);
+
+                    accordionHTML += `
+                        <div class="licence-type-group">
+                            <div class="licence-type-header" onclick="toggleAccordion(this)">
+                                <div>
+                                    <i class="fas fa-id-card" style="margin-right: 8px;"></i>
+                                    <span>${licenceType} (${tradeKeys.length} 種行業)</span>
+                                </div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="licence-type-content" style="display: none;">
+                    `;
+
+                    let tradeIndex = 0;
+                    tradeKeys.forEach(trade => {
+                        const regions = trades[trade];
+                        const regionKeys = Object.keys(regions);
+
+                        accordionHTML += `
+                            <div class="trade-group">
+                                <div class="trade-header" onclick="toggleAccordion(this)">
+                                    <div>
+                                        <i class="fas fa-briefcase" style="margin-right: 8px;"></i>
+                                        <span>${trade} (${regionKeys.length} 個地區)</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="trade-content" style="display: none;">
+                        `;
+
+                        let regionIndex = 0;
+                        regionKeys.forEach(region => {
+                            const districts = regions[region];
+                            const districtKeys = Object.keys(districts);
+
+                            accordionHTML += `
+                                <div class="region-group">
+                                    <div class="region-header" onclick="toggleAccordion(this)">
+                                        <div>
+                                            <i class="fas fa-globe-asia" style="margin-right: 8px;"></i>
+                                            <span>${region} (${districtKeys.length} 個分區)</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="region-content" style="display: none;">
+                            `;
+
+                            let districtIndex = 0;
+                            districtKeys.forEach(district => {
+                                const streets = districts[district];
+                                const streetKeys = Object.keys(streets);
+
+                                accordionHTML += `
+                                    <div class="district-group">
+                                        <div class="district-header" onclick="toggleAccordion(this)">
+                                            <div>
+                                                <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+                                                <span>${district} (${streetKeys.length} 條街道)</span>
+                                            </div>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="hawker-list" style="display: none;">
+                                `;
+
+                                let streetIndex = 0;
+                                streetKeys.forEach(street => {
+                                    const addresses = streets[street];
+                                    const addressKeys = Object.keys(addresses);
+
+                                    accordionHTML += `
+                                        <div class="street-group">
+                                            <div class="street-header" onclick="toggleAccordion(this)">
+                                                <div>
+                                                    <i class="fas fa-road" style="margin-right: 8px;"></i>
+                                                    <span>${street} (${addressKeys.length} 個地址)</span>
+                                                </div>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                            <div class="hawker-list" style="display: none;">
+                                    `;
+
+                                    let addressIndex = 0;
+                                    addressKeys.forEach(address => {
+                                        const hawkersAtAddress = addresses[address];
+                                        hawkersAtAddress.forEach((hawker, hawkerIndex) => {
+                                            accordionHTML += createHawkerItemHTML(hawker, `${datasetIndex}-${licenceTypeIndex}-${tradeIndex}-${regionIndex}-${districtIndex}-${streetIndex}-${addressIndex}-${hawkerIndex}`, true);
+                                        });
+                                        addressIndex++;
+                                    });
+
+                                    accordionHTML += `
+                                            </div>
+                                        </div>
+                                    `;
+                                    streetIndex++;
+                                });
+
+                                accordionHTML += `
+                                        </div>
+                                    </div>
+                                `;
+                                districtIndex++;
+                            });
+
+                            accordionHTML += `
+                                    </div>
+                                </div>
+                            `;
+                            regionIndex++;
+                        });
+
+                        accordionHTML += `
+                                </div>
+                            </div>
+                        `;
+                        tradeIndex++;
+                    });
+
+                    accordionHTML += `
+                            </div>
+                        </div>
+                    `;
+                    licenceTypeIndex++;
+                });
+
+                accordionHTML += `
+                        </div>
+                    </div>
+                `;
+                datasetIndex++;
+            });
+
+            container.innerHTML = accordionHTML;
+        }
+
+        // 創建小販牌照項目 HTML
+        function createHawkerItemHTML(hawker, index, inGroup = false) {
+            const props = hawker.properties || {};
+            const geometry = hawker.geometry || {};
+            const coordinates = geometry.coordinates || [];
+
+            return `
+                <div class="hawker-item" id="hawker-${index}">
+                    <div class="hawker-meta">
+                        <span class="hawker-badge badge-licence">
+                            <i class="fas fa-id-card" style="margin-right: 4px;"></i>
+                            牌照: ${props.NSEARCH01_TC || '未知類型'}
+                        </span>
+                        <span class="hawker-badge badge-trade">
+                            <i class="fas fa-briefcase" style="margin-right: 4px;"></i>
+                            行業: ${props.SEARCH03_TC || '未知行業'}
+                        </span>
+                        <span class="hawker-badge badge-location">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i>
+                            位置: ${props.SEARCH01_TC || '未知地區'} - ${props.SEARCH02_TC || '未知分區'}
+                        </span>
+                        ${props.LASTUPDATE ? `
+                        <span class="hawker-badge" style="background: #fef3c7; color: #92400e;">
+                            <i class="fas fa-clock" style="margin-right: 4px;"></i>
+                            更新: ${formatDateTime(props.LASTUPDATE)}
+                        </span>
+                        ` : ''}
+                    </div>
+                    <div class="hawker-info">
+                        <div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">牌照編號:</div>
+                                <div class="hawker-value">${props.NAME_TC || props.NAME_EN || 'N/A'}</div>
+                            </div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">資料集:</div>
+                                <div class="hawker-value">${props.DATASET_TC || props.DATASET_EN || 'N/A'}</div>
+                            </div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">牌照類型:</div>
+                                <div class="hawker-value">${props.NSEARCH01_TC || props.NSEARCH01_EN || 'N/A'}</div>
+                            </div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">行業類型:</div>
+                                <div class="hawker-value">${props.SEARCH03_TC || props.SEARCH03_EN || 'N/A'}</div>
+                            </div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">區域:</div>
+                                <div class="hawker-value">${props.SEARCH01_TC || props.SEARCH01_EN || 'N/A'} → ${props.SEARCH02_TC || props.SEARCH02_EN || 'N/A'} → ${props.SEARCH04_TC || props.SEARCH04_EN || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="hawker-row">
+                                <div class="hawker-label">地址:</div>
+                                <div class="hawker-value">${props.ADDRESS_TC || props.ADDRESS_EN || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 通用的折疊/展開函數
+        function toggleAccordion(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const icon = headerElement.querySelector('.fa-chevron-down, .fa-chevron-up');
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                headerElement.classList.add('active');
+                if (icon) icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                headerElement.classList.remove('active');
+                if (icon) icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        // 格式化日期時間
+        function formatDateTime(dateTimeString, timeDiff = 0) {
+            if (!dateTimeString) return 'N/A';
+            try {
+                // 嘗試解析各種可能的日期格式
+                let date = new Date(dateTimeString);
+                date = new Date(date.getTime() + timeDiff);
+                if (isNaN(date.getTime())) {
+                    // 如果是 "YYYY-MM-DD HH:MM:SS" 格式
+                    const match = dateTimeString.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+                    if (match) {
+                        const [_, year, month, day, hour, minute, second] = match;
+                        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+                    }
+                    return dateTimeString;
+                }
+                return date.toLocaleString('zh-HK', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            } catch (error) {
+                return dateTimeString;
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'info') {
+            // 移除現有通知
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            // 創建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            // 添加到文檔
+            document.body.appendChild(notification);
+            // 3秒後移除
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // 初始化教程
+        if (!localStorage.getItem('hawkerTutorialShown')) {
+            setTimeout(() => {
+                showNotification(
+                    "歡迎使用「小販牌照」查詢系統！\n" +
+                    "• 點擊「載入小販牌照資料」按鈕獲取最新數據\n" +
+                    "• 支持按資料集、牌照類型、行業、地區分組顯示\n" +
+                    "• 使用搜索框快速查找特定小販牌照\n" +
+                    "• 使用 IndexedDB 緩存技術提升載入速度",
+                    'info'
+                );
+                localStorage.setItem('hawkerTutorialShown', 'true');
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>
